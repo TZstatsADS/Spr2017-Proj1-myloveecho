@@ -9,6 +9,8 @@ author: "KE HAN kh2793"
 The step 0 is to prepare the data, including data collecting and data cleaning. Also, I counted all the words in the speech, get the somekind panel data. I find that working with numerical data would tell us something. What's more, numerical representitive of the speech would include more tools in analyzing.
 
 ```{r}
+#get the word count for further analysis
+#some of the errors/unmatch in president speech time was corrected in the finance file
 
 
 ```
@@ -94,8 +96,38 @@ What mainly in this part, is the comparision between the centroal/trump/others. 
 
 Actually, Trump enjoyed using WE and OUR, I think this is a way to gain trust from the others. And  it is somehow an exaggeration. Since, there is some many fighting back voice, WE and OUR is a way to get near to others, showing that everyone is on the same boat. Just like Obama, "Together we can!", closer relationship with everyone.
 
+```{r,warning=FALSE}
+# all about Trump Speech style
+# if needed, truning sentences into one long string
+# HC <- paste(HC, collapse = " ")
+# load
+Trump<-readLines("Trump.txt")
+# to lower
+Trump<-tolower(Trump)
+#process
+Trump.words <- strsplit(Trump, split = "[ |. |, |  ]")
+Trump_count<-table(Trump.words)
+Trump_count<-sort(Trump_count,decreasing = TRUE)
+head(Trump_count,10)
+tail(Trump_count)
+############ comparision########
+Others<-readLines("Others.txt")
+Others<- paste(Others, collapse = " ")
+Others<-tolower(Others)
+Others.words<-strsplit(Others,split = "[ |. |, |  ]")
+Others_count<-table(Others.words)
+Others_count<-sort(Others_count,decreasing = TRUE)
+head(Others_count,10)
+tail(Others_count)
+```
+
+Here, the top words already differ from Trump to others. He mentioned WILL, AMERICA, ALL, YOU, and the words he did not frequently mentioned are THAT, BE, IT, BY.
+
+It is similiar to 
+
 ```{r}
-stopword<-readline('stopwords_300.txt') 
+## now, comparing only the stopwords
+# stopword<-readline('stopwords_300.txt') this is a trying methods, after analyzing the stopwords, it is not reproductable here. So I only list out the critical part
 stopwords = set([]) 
 for line in file: 
   line = line.strip() 
@@ -135,6 +167,9 @@ for filename in sorted(cosine, key=cosine.get):
 
 ```
 
+![image](https://media.licdn.com/mpr/mpr/AAEAAQAAAAAAAAfPAAAAJDhiOWQ5ZjYzLTUzYTctNDNkMy04M2FmLTIzY2RiZmY2NjZjZg.jpg)
+
+
 # Step 3: analysis of the speech content (words)
 
 Here, the analysis of the speech mostly work with words. 
@@ -146,7 +181,17 @@ In the tutorial, teacher analysis the wording and find the time trend behind it.
 Here, I dig deepper into the area of speech's correlation with economy. Do the data mining work, and do the feature selection with all the words we have.
 
 ```{r}
+#in the data processing part, I use let_join to get the GDP/YoY/Financial Market/CPI data into one single sheet
+# since the data of GDP only from 1929 great depression, so only analyze part of the data after 1930s
+step2<-read.csv("step2.csv")
+```
+
+# Topic model 15 topics!!!!!
+
+```{r}
 #using the preprocess data with financial data(GDP, YoY, Financial market data, dollar price)
+#due to data constrain, the analysis only include 1929-2017
+
 data<-read.csv("step2.csv")
 
 ```
