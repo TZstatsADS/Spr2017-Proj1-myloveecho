@@ -1,21 +1,81 @@
 ---
-title: "R Notebook"
+title: "Project 1"
 output: html_notebook
 author: "KE HAN kh2793"
 ---
+## Summary
 
-# Step 0: load data and data cleaning
+Here, this notbook include 4 parts:
 
-The step 0 is to prepare the data, including data collecting and data cleaning. Also, I counted all the words in the speech, get the somekind panel data. I find that working with numerical data would tell us something. What's more, numerical representitive of the speech would include more tools in analyzing.
+##### - data preprocessing
 
+##### - sentimental and length analysis
+
+##### - wording analysis
+
+######     ---- speech style 
+
+######     ---- wording to economy 
+
+##### - summary
+
+In the sentimental analysis and the length, I ploted all the information into a same plot. This plot shows the sentiment in the speech, and it generated some ideas for the further review.
+
+Then, it comes to the wording analysis. It is quite similary to word cloud, since they both using the freqency of the words. And two parts are in it, the first is using stop words to analyzing speech style.  And the second is using other data, like yearly GDP, GDP growth, financial market data and CPI to crosss analyze the presidental inaugration speech. The inuition is the inaugration speech would reflect the president's wish and goal which would benefit or feeled by Americans. And what's more, this topic interests me because in clustering it would show sentimental anlysis's value. 
+
+And in the wording to economy, some of the variable I used are derived from papers and articile I read before, some of the url link is in the reference.
+
+Party/Change of party: one of the article I read analyzed the relationship  of party change to stock trends(that part is really interesting, since market trends tell us ahead of time, which party would win). So, I used the SP500 index to indicate the stock market. Also, I know that some student use NYSE or other index, but that is not reflecting overall American. The diviation of small company/ small market might because of how Trump promised to SMB (small-midium size business), so I looked at NYSE but not included here.
+
+## Step 0: load data and data cleaning
+
+The step 0 is to prepare the data, including data collecting and data cleaning. Also, I counted words in the speech, get the somekind panel data. I find that working with numerical data would tell us something. What's more, numerical representitive of the speech would include more tools in analyzing.
+
+And the methodology here, inculding left_join varibales and speech data, descriptive summary of speeches, reshape the data into data.frame which would be easy handle.
+
+Counting the words with table function:
 ```{r}
 #get the word count for further analysis
-#some of the errors/unmatch in president speech time was corrected in the finance file
-
-
+#to avoid reproductivity problem, use "file.choose()"
+Test<-readLines(file.choose())
+# to lower
+Test<-tolower(Test)
+#process, using , . and space to seperate the sentence
+Test.words <- strsplit(Test, split = "[ |. |, |  ]")
+Test_count<-table(Test.words)
+Test_count<-sort(Test_count,decreasing = TRUE)
+head(Test_count,10)
+tail(Test_count)
 ```
 
-# Step 1: analysis of the whole speech & visualization
+Left join the tables with financial data:
+```{r}
+Test <-readLines(file.choose())
+Financials<-readLines(file.choose())
+Test <- left_join(Test, Financials, by = "year_president")
+#some of the errors/unmatch in president speech time was corrected in the finance file, so the following analysis would use step2.csv, which is a processed data set, covering from 1930s, by when there is GDP, CPI and financial market data
+```
+
+Combine all speeches into one file, making it easy to compare others with Trump:
+```{r}
+#files <- list.files("./data/InauguralSpeeches/")
+#sometimes the previous line would not work, using file.choose would avoid problems
+files <- list.files(file.choose())
+files <- files[-length(files)]
+lng_files <- length(files)
+
+sentences <- data.frame(speech = rep(NA, lng_files),
+            year_president = rep(NA, lng_files))
+for (i in 1 : lng_files) {
+    # import each individual speech
+    file_path <- paste0("./data/", files[i])
+    temp <- readLines(file_path)
+    temp <- paste(temp, collapse = " ")  # concatenate all characters to one string
+    sentences$speech[i] <- temp
+}
+```
+
+## Step 1: analysis of the whole speech & visualization
 
 The goal of this part is to integrate the analysis of sentiment/length. Some of the thought is derived from the Smart Data with R webpage. And the financial data is attached in the cvs file in the data folder.
 
@@ -28,29 +88,6 @@ library(ggrepel)
 library(rio)
 
 # Import Data
-folder.path="../data/InauguralSpeeches/"
-speeches=list.files(path = folder.path, pattern = "*.txt")
-prez.out=substr(speeches, 6, nchar(speeches)-4)
-
-############
-pres_party <- import("./data/further_files/Presidents_Party.csv")
-
-files <- list.files("./data/")
-files <- files[-length(files)]
-lng_files <- length(files)
-
-sentences <- data.frame(speech = rep(NA, lng_files),
-            year_president = rep(NA, lng_files))
-
-for (i in 1 : lng_files) {
-    # import each individual speech
-    file_path <- paste0("./data/", files[i])
-    temp <- readLines(file_path)
-    temp <- paste(temp, collapse = " ")  # concatenate all characters to one string
-    sentences$speech[i] <- temp
-    sentences$year_president[i] <- strsplit(files[i], split = ".", fixed = T)[[1]][1]
-}
-
 sentences <- sentSplit(sentences, "speech", verbose = F)
 
 #polarity() is a function that provides sentiment analysis
@@ -88,7 +125,7 @@ g <- g + theme_bw()
 g
 ```
 
-# Step 2: analysis of the speech style
+## Step 2: analysis of the speech style
 
 Here, I define the speech as the style, which is represented as stopwords.
 
@@ -121,62 +158,31 @@ head(Others_count,10)
 tail(Others_count)
 ```
 
-Here, the top words already differ from Trump to others. He mentioned WILL, AMERICA, ALL, YOU, and the words he did not frequently mentioned are THAT, BE, IT, BY.
+Here, the top words already differ from Trump to others. The number here is the absolute time the word mentioned. But the usage of words, and their rank do show something. Here, he mentioned WILL, AMERICA, ALL, YOU, and the words he did not frequently mentioned are THAT, BE, IT, BY.
 
-It is similiar to 
+The interesting thing I found is that, Trump is using less relative clause since there is less that. One of the reason might be the people who vote for him is different from the one used to be. In some new, they mentioned that, the segmentation of the audience is different. See reference: [Reality Check: Who Voted for Donald Trump?](http://www.bbc.com/news/election-us-2016-37922587). Also, Trump is using shorter sentences in his speech (not listed here, see attachedment referals). And he is not using as much BE as others. One of the reason might be he is using WILL instead, another way to express future and deliver it to the Americans.
+
+It is similiar to the discussion in class, that media is changing the way people speak. And evidence is that, people are using shorter sentences.
 
 ```{r}
-## now, comparing only the stopwords
-# stopword<-readline('stopwords_300.txt') this is a trying methods, after analyzing the stopwords, it is not reproductable here. So I only list out the critical part
-stopwords = set([]) 
-for line in file: 
-  line = line.strip() 
-stopwords.add(line) 
-file.close() 
-filenames = os.listdir('Speeches_Text') 
-counts = {) centroid = () 
-for filename in filenames: 
-  file = open('Speeches_Text/' + filename, 'r') 
-  counts[filename] = {} 
-  length = 0 
-  for line in file: 
-    line = line.strip() 
-  line = line.lower() 
-  words = re.split('W+', line) 
-  for word in words: 
-    if len(word) > 0 and word in stopwords: 
-    counts[filename][word] = counts[filename].get(word,0) + 1 
-  length += 1 
-  file.close() 
-  for word in counts[filename]: 
-    counts[filename][word] /= float(length) 
-  # normalization centroid[word] = centroid.get(word,0) + counts[filename][word] 
-centroid list = [] 
-for word in sorted(centroid, key=centrold.get, reverse=True): 
-  centroidlist.append(centrold[word]) 
-cosine = {) 
-for filename in counts: 
-  speech_list = [] 
-  for word in sorted(centroid, key=centrold.get, reverse=True): 
-  if word in counts[filename]: speech_list.append(counts[filename][word]) 
-else:
-  speech_list.append(0.0) 
-cosine[filename] = 1 - spatial.distance.cosine(speech_list, centroid list) 
-for filename in sorted(cosine, key=cosine.get): 
-  print filename, cosine[filename] 
+## now, comparing only the stopwords & the GRAPHICS
+# stopword<-readline('stopwords_300.txt') this is a trying methods, after analyzing the stopwords, it is not reproductable here. So I only list out the top 10 stopwords
+
+
+# style comparision to other presidents
 
 ```
 
 ![image](https://media.licdn.com/mpr/mpr/AAEAAQAAAAAAAAfPAAAAJDhiOWQ5ZjYzLTUzYTctNDNkMy04M2FmLTIzY2RiZmY2NjZjZg.jpg)
 
 
-# Step 3: analysis of the speech content (words)
+## Step 3: analysis of the speech content (words)
 
 Here, the analysis of the speech mostly work with words. 
 
-## time trend
+### time trend
 
-In the tutorial, teacher analysis the wording and find the time trend behind it. For example, the wording in 1920s maybe more harsh, about war. And nowadays, focused more on economy.
+In the tutorial, teacher analysis the wording and find the time trend behind it. For example, the wording in 1920s maybe more harsh, about war. And nowadays, focused more on economy. And to me, I think this part is very important, since it is most relevant part to people's daily life.
 
 Here, I dig deepper into the area of speech's correlation with economy. Do the data mining work, and do the feature selection with all the words we have.
 
@@ -184,9 +190,11 @@ Here, I dig deepper into the area of speech's correlation with economy. Do the d
 #in the data processing part, I use let_join to get the GDP/YoY/Financial Market/CPI data into one single sheet
 # since the data of GDP only from 1929 great depression, so only analyze part of the data after 1930s
 step2<-read.csv("step2.csv")
+str(step2)
+# lots of the data in the sheet would turned into factor variable
 ```
 
-# Topic model 15 topics!!!!!
+## Topic model 15 topics!!!!!
 
 ```{r}
 #using the preprocess data with financial data(GDP, YoY, Financial market data, dollar price)
@@ -196,7 +204,7 @@ data<-read.csv("step2.csv")
 
 ```
 
-## not about time
+### not about time
 
 I know, there must be something across time, which is classic american, not changing with time trend.
 
@@ -209,9 +217,12 @@ From the tutorial, the length of sentence, the emotion of paragrph and the clust
 ```
 
 
-# Step 4: summary
+## Step 4: summary
 
-In the R Notebook, the analysis found out that  
+The most interesting result I have see is that, Trump do differ from others. And hi
+
+
+Also, from  
 
 After analysing the word data and the whole speech with text mining techniques, I think more work or comparsion might be the one between candidata and between candidata/presidental one. Since, it is more currently related. And it might be helpful for us to find out whether Trump is trust worth or not. For example, Trump has not change wording in candidata domination and presidental speech, then might some regulation would come soon, which is more relative to the people.
 
@@ -222,6 +233,5 @@ After analysing the word data and the whole speech with text mining techniques, 
 
 # reference
 http://smartdatawithr.com/en/
-
 http://avalon.law.yale.edu/subject_menus/inaug.asp
 
