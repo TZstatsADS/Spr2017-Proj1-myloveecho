@@ -94,9 +94,7 @@ And some view of the GDP YoY can be seen here.
 ### Some findings:
 
 *  The GDP YoY can help us to devide all the speeches into 4 category.
-
 *  The speech data can be analyzed using polarity, which is a direct way to get information.
-
 *  Comparision of wording, cross analysis of data from other sources to further analyze
 
 ## Step 1: analysis of the whole speech & visualization
@@ -338,53 +336,97 @@ Interesting methods are the one discussed in class, using categorical and sentim
 
 ![image](https://img3.doubanio.com/view/status/median/public/e14c6940a5fc26f.jpg)
 
-But my model, I would use simple linear regression model on the data. I have a concern on this, since there is limited data, some regression issue might be hard to resolve.
-
-If possible, maybe tree and logistic regression can be introduced.
-
 ```{r}
 #using the preprocess data with financial data(GDP, YoY, Financial market data, dollar price)
 #due to data constrain, the analysis only include 1940s till now
 # run a linear model of these data
-
-
+pairs(step2)
 ```
+Too see clearly, use the image below.
+
+![image](https://img3.doubanio.com/view/status/median/public/3536f2f720a6303.jpg)
+
+But my model, I would use simple linear regression model on the data. I have a concern on this, since there is limited data, some regression issue might be hard to resolve. So, after running some linear model, I find one of the most ineresting topic with those data. That is wether Trump would have a second term! Then I change the data into training and test(only Trump data), then 
+
+If possible, maybe tree and SVM can be introduced.
+
+```{r}
+library(leaps)
+train<-read.csv("step3.csv")
+train<-train[,3:15]
+train$GDP<-as.numeric(train$GDP)
+regfit.full=regsubsets(train$Term~.,data=train,nvmax=8)
+summary(regfit.full)
+```
+
+And the economy data is relevant to this. ALso, the heat map is quite vague, but mean something.
+
+```{r}
+train<-read.csv("step3.csv")
+row.names(train) <- train$President
+tt<-data.matrix(train[,2:16])
+heatmap(tt)
+```
+
+![image](https://img3.doubanio.com/view/status/median/public/f511f4df90f8925.jpg)
+
+This graph somehow restreghten the conclusion in part 1.
 
 ### not about time
 
 I know, there must be something across time, which is classic american, not changing with time trend.
 
-From the tutorial, the length of sentence, the emotion of paragrph and the clustering of working are all about content. Here, I analyzed the us
+From the tutorial, the length of sentence, the emotion of paragrph and the clustering of working are all about content. Here, I analyzed the top related non-stop word.
 
 ```{r}
 #using the same one from step1(using the word counting method for the non- stoping words)
-stopwords<-c("people","government","world","nation","great","country","new","peace","own","america","states","time","citizen","public","")
-step2stop<-matrix(NA,ncol=2,nrow=length(stopwords))
+content<-c("people","government","world","nation","great","country","new","peace","own","america","states","time","citizen","public","war","nations","freedom","let","power","american","life","men","free","fellow","make","spirit","good","made","work","because","hope","day","right","liberty","president","way","americans","faith","old","same","part")
+contentcontent<-matrix(NA,ncol=2,nrow=length(content))
 j=1
-for( i in stopwords){
-  step2stop[j,1]=Trump_count[i]/2103
-  step2stop[j,2]=Others_count[i]/130231
+for( i in content){
+  contentcontent[j,1]=Trump_count[i]/2103
+  contentcontent[j,2]=Others_count[i]/130231
   j=j+1
 }
-colnames(step2stop) <- c("Trump", "Others")
-rownames(step2stop) <- stopwords
-barplot(t(step2stop), beside=T,horiz = T, ylab="usage of words", cex.names=0.8, las=2,col=c("darkblue","red"),legend.text = c("Trump", "Others") )
-
+colnames(contentcontent) <- c("Trump", "Others")
+rownames(contentcontent) <- content
+barplot(t(contentcontent), beside=T,horiz = T, ylab="usage of words", cex.names=0.8, las=2,col=c("darkblue","red"),legend.text = c("Trump", "Others") )
+# since the centroid did not show much, so it is not here.
 ```
+![image](https://img3.doubanio.com/view/status/median/public/24c98aa04031012.jpg)
 
+The graph shows a lot. "Make America Great Again." In this slot, words MAKE/AMERICA used quite often. Trump is Top1 among all the presidents in saying AMERICA and AMERICAN. On the other hand, he never used the words PEACE, FREEDOM, CONSITITUTION, LIBERTY, DUTY, etc which had been so popular with his predecessors.
+
+And the most interesting words are FACTORIES, BORDERS, and DREAM - right go abreast with Trump's agenda."Build a wall.... Build factories to stimulate econoy" see link for more infomation. [Trump to Order Mexican Border Wall and Curtail Immigration](https://www.nytimes.com/2017/01/24/us/politics/wall-border-trump.html?_r=0)
+
+### Some findings:
+*  GDP/financial market related to the time trend of the speeches. As time goes by, sentences getting shorter and words in sentences same trend.
+*  Trump using American more than others. Thus showing exaggeration on the unity of American. Also using same and we, which is a evidence of similarity and unity in USA. 
+*  Lastly, Trump has a clear theme comparied to others. Thus lots of words a used in emphsize his goal as a president.
 
 ## Step 4: summary
 
-The most interesting result I have see is that, Trump do differ from others. And hi
+The most interesting result I have see is that, Trump do differ from others. And here is the summary of the findings:
 
+*  The GDP YoY can help us to devide all the speeches into 4 category. Also, GDP/financial market related to the time trend of the speeches. As time goes by, sentences getting shorter and words in sentences same trend, since they are top in stepwise feature selection. 
 
-Also, from  
+*  For different party, the difference is quite obvious. Especially the sentimental ones, since polarity() shows the sentiment (polarity) of text by grouping variable(s). Actucally  Maybe clustering would make sense here. Also, this is a proof to one of the articles I read. And I think this is part of the common point I am looking for, that is althongh time change, president stayed same. Further analysis see part 2.
+
+*  Trump uses the shortest sentences of all presidents, and his speech has a higher numerical sentiment compared to both Obama speeches. His speech is very short(but not the shortest one). 
+
+*  Time trend exists. Adams speech in 1797 used longest sentneces. As the discussion in class, media trend and how people comunicate evolve. I also read some paper about this, one of the reason is that new words are coming up, some words mean more than one concept. See the link for more information. It also analyzed the complexity of the sentence, the structure and the visulization of sentences., showing same pattern. 
+
+*  Very interesting in stop words Trump is using. From the perspective of data science, it is clear to show that Trump’s speech turned out to be the second farthest from the centroid, right behind George W. Bush’s address of 2001. For the part of comparision between centriod to president, Trump is in top5. Although not Top1, it is different enough.  Trump was strong in using OUR and WE – and almost never said “I”. I think this is a pattern shown about exaggeration, and this is similar to Obama's 2013 speech
+
+*  Trump is the all-time winner in using WILL (and interestingly, a large portion of his speech is in the future tense). Also, if looking at the actural sentences, Trump use WE’VE, the oral language. And no people did this before. Trump using American more than others. Thus showing exaggeration on the unity of American. Also using same and we, which is a evidence of similarity and unity in USA. Trump has a clear theme comparied to others. Thus lots of words a used in emphsize his goal as a president.
+
+### Here is potential business interests:
+*  Further analysis and underlying business usage would be, president speech is a way to reflect common people's life. 
+
+*  Inuitively grapgic to further analysis on interesting topics for business purpose, and thus further test is needed here. Such as sentences getting shorter, Twitter can switch to shorter text. Instagram getting popular, since people are more interested in pictures and shorter sentences, so there is no need for long sentences. 
+
 
 After analysing the word data and the whole speech with text mining techniques, I think more work or comparsion might be the one between candidata and between candidata/presidental one. Since, it is more currently related. And it might be helpful for us to find out whether Trump is trust worth or not. For example, Trump has not change wording in candidata domination and presidental speech, then might some regulation would come soon, which is more relative to the people.
-
-
-
-
 
 
 # reference
