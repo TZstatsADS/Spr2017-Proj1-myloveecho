@@ -30,8 +30,8 @@ Please see each subfolder for a README file.
 interesting reading:
 [text analysis for Trump on tweets](https://dzone.com/articles/text-analysis-of-trumps-tweets-confirms-he-writes)
 
-Theory behind those speeches:
+## Theory behind those speeches:
 + This distribution also comes up in other rare events such as the frequency of words in a text (the most common word is really really common compared to the next word on the list). 
 + Historical change in political topics is reflected, such as the role of president, the power of president VS congress, the time trend of the international politics (world war, cold war, communist, etc)
 + Grammer and linguistic change, eg. length of sentence--> reflected media change?
-+ to be continue
+
