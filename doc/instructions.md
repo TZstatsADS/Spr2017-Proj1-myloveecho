@@ -42,11 +42,3 @@ A GitHub starter codes repo will be posted on piazza for you to fork and start y
 * R [tibble](https://cran.r-project.org/web/packages/tibble/vignettes/tibble.html)
 * [Rcharts](http://rcharts.io/gallery/), quick interactive plots
 * [htmlwidgets](http://www.htmlwidgets.org/), javascript library adaptation in R. 
-
-##### Project tools
-* A brief [guide](http://rogerdudler.github.io/git-guide/) to git.
-* Putting your project on [GitHub](https://guides.github.com/introduction/getting-your-project-on-github/).
-##### Examples
-+ [Topic modeling](https://cran.r-project.org/web/packages/topicmodels/vignettes/topicmodels.pdf)
-+ [Clustering](http://www.statmethods.net/advstats/cluster.html)
-+ [Sentiment analysis of Trump's tweets](https://www.r-bloggers.com/sentiment-analysis-on-donald-trump-using-r-and-tableau/)
